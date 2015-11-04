@@ -1,0 +1,52 @@
+// Implementation of a Swiss-system tournament
+
+Swiss Tournament:
+  N, number of players, should be a power of two, 2^M.
+  M, number of rounds, is log2(N).
+  Number of matches per round will be 2^(M-1).
+
+MY DEV ENVIRONMENT:
+    Python 3.5
+    PostgreSQL 9.4.4
+    Ubuntu 15.04
+
+
+// PostgreSQL database setup
+
+host=localhost
+
+dbname=tournament   # psql postgres -f tournament.sql
+
+user=postgres       # default user, if you are testing this implementation
+                    # as a different user, please modify psycopg2.connect()
+                    # argument in connect() function in tournament.py
+
+password=password   # On your database, if you didn't set password for
+                    # user 'postgres', please modify psycopg2.connect()
+                    # argument in connect() function in tournament.py
+
+
+// Test this implementation
+
+psql postgres -f tournament.sql
+
+    DROP DATABASE
+    CREATE DATABASE
+    You are now connected to database "tournament" as user "whomever".
+    CREATE TABLE
+    CREATE TABLE
+    CREATE VIEW
+    CREATE VIEW
+    CREATE VIEW
+
+python tournament_test.py
+
+    1. Old matches can be deleted.
+    2. Player records can be deleted.
+    3. After deleting, countPlayers() returns zero.
+    4. After registering a player, countPlayers() returns 1.
+    5. Players can be registered and deleted.
+    6. Newly registered players appear in the standings with no matches played.
+    7. After a match, players have updated standings.
+    8. After one match, players with one win are paired.
+    Success!  All tests pass!
