@@ -1,0 +1,18 @@
+
+Perform following steps to generate the website:
+
+    unzip p1-movie-trailer-website.zip
+    cd p1-movie-trailer-website
+    chmod +x entertainment_center.py
+
+You can create and open the website by following:
+
+    ./entertainment_center.py
+
+Output:
+
+    fresh_tomatoes.html
+
+Manual Run:
+
+    open -a "Google Chrome.app" fresh_tomatoes.html
