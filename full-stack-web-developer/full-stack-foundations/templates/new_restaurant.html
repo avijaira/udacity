@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Add a new restaurant</title>
+</head>
+<body>
+  <h2>Add a New Restaurant</h2>
+  <form action="{{ url_for('new_restaurant') }}" method="POST">
+    <h3>Restaurant Name
+      <input type='text' size='30' name='name'>
+      <input type='submit' value='Add'>
+    </h3>
+  </form>
+</body>
+</html>
