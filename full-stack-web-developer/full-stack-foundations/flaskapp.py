@@ -1,31 +1,20 @@
-from flask import Flask
 from flask import flash
 from flask import jsonify
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-from database_setup import Base
-from database_setup import MenuItem
-from database_setup import Restaurant
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-
-app = Flask(__name__)
-
-
-engine = create_engine('sqlite:///restaurantmenu.db')
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
+from flaskapp_setup import app
+from flaskapp_setup import db
+from flaskapp_setup import MenuItem
+from flaskapp_setup import Restaurant
 
 
 """ API to get list of restaurants in JSON format.
 """
 @app.route('/restaurants/JSON')
 def restaurants_json():
-    restaurants = session.query(Restaurant).order_by(Restaurant.name).all()
+    restaurants = db.session.query(Restaurant).order_by(Restaurant.name).all()
     return jsonify(Restaurant=[restaurant.serialize for restaurant in restaurants])
 
 
@@ -33,8 +22,8 @@ def restaurants_json():
 """
 @app.route('/restaurant/<int:restaurant_id>/menu/JSON')
 def menu_json(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = db.session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
     return jsonify(MenuItems=[item.serialize for item in items])
 
 
@@ -42,7 +31,7 @@ def menu_json(restaurant_id):
 """
 @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/JSON')
 def menu_item_json(restaurant_id, menu_id):
-    item = session.query(MenuItem).filter_by(id=menu_id).one()
+    item = db.session.query(MenuItem).filter_by(id=menu_id).one()
     return jsonify(MenuItem=item.serialize)
 
 
@@ -51,7 +40,7 @@ def menu_item_json(restaurant_id, menu_id):
 @app.route('/')
 @app.route('/restaurants/')
 def show_restaurants():
-    restaurants = session.query(Restaurant).order_by(Restaurant.name)
+    restaurants = db.session.query(Restaurant).order_by(Restaurant.name)
     return render_template('show_restaurants.html', restaurants=restaurants)
 
 
@@ -62,8 +51,8 @@ def new_restaurant():
     if request.method == 'POST':
         if request.form['name']:
             new_restaurant = Restaurant(name=request.form['name'])
-            session.add(new_restaurant)
-            session.commit()
+            db.session.add(new_restaurant)
+            db.session.commit()
         return redirect(url_for('show_restaurants'))
     else:
         return render_template('new_restaurant.html')
@@ -75,14 +64,14 @@ def new_restaurant():
 def edit_restaurant(restaurant_id):
     if request.method == 'POST':
         if request.form['name']:
-            edited_restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+            edited_restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
             edited_restaurant.name = request.form['name']
-            session.add(edited_restaurant)
-            session.commit()
+            db.session.add(edited_restaurant)
+            db.session.commit()
             flash("Restaurant name has been edited!")
         return redirect(url_for('show_restaurants'))
     else:
-        restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+        restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
         return render_template('edit_restaurant.html',
                                restaurant_name=restaurant.name,
                                restaurant_id=restaurant.id)
@@ -93,13 +82,13 @@ def edit_restaurant(restaurant_id):
 @app.route('/restaurant/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
 def delete_restaurant(restaurant_id):
     if request.method == 'POST':
-        deleted_restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-        session.delete(deleted_restaurant)
-        session.commit()
+        deleted_restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
+        db.session.delete(deleted_restaurant)
+        db.session.commit()
         flash("Restaurant has been deleted!")
         return redirect(url_for('show_restaurants'))
     else:
-        restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+        restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
         return render_template('delete_restaurant.html',
                                restaurant_name=restaurant.name,
                                restaurant_id=restaurant.id)
@@ -110,8 +99,8 @@ def delete_restaurant(restaurant_id):
 @app.route('/restaurant/<int:restaurant_id>/')
 @app.route('/restaurant/<int:restaurant_id>/menu/')
 def show_menu(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id)
+    restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = db.session.query(MenuItem).filter_by(restaurant_id=restaurant.id)
     return render_template('show_menu.html',
                            restaurant_name=restaurant.name,
                            restaurant_id=restaurant.id,
@@ -133,8 +122,8 @@ def new_menu_item(restaurant_id):
                                 price=request.form['price'],
                                 course=request.form['course'],
                                 restaurant_id=restaurant_id)
-            session.add(new_item)
-            session.commit()
+            db.session.add(new_item)
+            db.session.commit()
             flash("New menu item has been created!")
         return redirect(url_for('show_menu', restaurant_id=restaurant_id))
     else:
@@ -147,15 +136,15 @@ def new_menu_item(restaurant_id):
 def edit_menu_item(restaurant_id, menu_id):
     if request.method == 'POST':
         if request.form['name']:
-            edited_item = session.query(MenuItem).filter_by(id=menu_id).one()
+            edited_item = db.session.query(MenuItem).filter_by(id=menu_id).one()
             edited_item.name = request.form['name']
-            session.add(edited_item)
-            session.commit()
+            db.session.add(edited_item)
+            db.session.commit()
             flash("Menu item has been edited!")
         return redirect(url_for('show_menu', restaurant_id=restaurant_id))
     else:
-        restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-        edited_item = session.query(MenuItem).filter_by(id=menu_id).one()
+        restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
+        edited_item = db.session.query(MenuItem).filter_by(id=menu_id).one()
         return render_template('edit_menu_item.html',
                                restaurant_id=restaurant.id,
                                restaurant_name=restaurant.name,
@@ -168,14 +157,14 @@ def edit_menu_item(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete/', methods=['GET', 'POST'])
 def delete_menu_item(restaurant_id, menu_id):
     if request.method == 'POST':
-        deleted_item = session.query(MenuItem).filter_by(id=menu_id).one()
-        session.delete(deleted_item)
-        session.commit()
+        deleted_item = db.session.query(MenuItem).filter_by(id=menu_id).one()
+        db.session.delete(deleted_item)
+        db.session.commit()
         flash("Menu item has been deleted!")
         return redirect(url_for('show_menu', restaurant_id=restaurant_id))
     else:
-        restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-        deleted_item = session.query(MenuItem).filter_by(id=menu_id).one()
+        restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).one()
+        deleted_item = db.session.query(MenuItem).filter_by(id=menu_id).one()
         return render_template('delete_menu_item.html',
                                restaurant_id=restaurant_id,
                                restaurant_name=restaurant.name,
