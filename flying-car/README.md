@@ -1,2 +1,2 @@
 
-Flying Car Nanodegree Projects
+Flying Cars and Autonomous Flight Nanodegree Projects

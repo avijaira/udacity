@@ -1,2 +1,2 @@
 
-Udacity's Self-Driving Car Nanodegree Projects
+Self-Driving Car Nanodegree Projects
